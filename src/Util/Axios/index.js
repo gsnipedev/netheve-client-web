@@ -1,3 +1,3 @@
-import instance from "./Axios";
+import AxiosHttpInstance from "./Axios";
 
-export default instance;
+export default AxiosHttpInstance;

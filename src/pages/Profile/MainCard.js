@@ -1,5 +1,5 @@
 import EditIcon from "@mui/icons-material/Edit";
-import { Avatar, Box, Card, CardContent, Container, IconButton, Stack, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, CardContent, Container, IconButton, Link, Stack, Typography } from "@mui/material";
 
 const MainCard = (props) => {
   return (
@@ -26,9 +26,14 @@ const MainCard = (props) => {
           <Typography className="barlow" fontSize={15} color="gray">
             {props.displayInfo}
           </Typography>
-          <Typography className="roboto" fontSize={13} color="gray">
-            Los Santos, San Andreas
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Typography className="roboto" fontSize={13} color="gray">
+              Los Santos, San Andreas
+            </Typography>
+            <Link className="mukta" onClick={() => props.handle(true)} sx={{ ":hover": { cursor: "pointer" } }}>
+              Information Detail
+            </Link>
+          </Stack>
         </Container>
       </CardContent>
     </Card>

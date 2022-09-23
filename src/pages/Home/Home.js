@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from "react";
-import Footer from "../../components/Footer";
+import React, { createContext, useEffect, useReducer, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import NewPostForm from "../../components/NewPostForm";
 import ProfileCard from "../../components/ProfileCard";
 import PublicPostCard from "../../components/PublicPostCard";
 import TopicCard from "../../components/TopicCard";
-import instance from "../../Util/Axios";
+import { fetchFypData, fetchUserData, updateHomeState } from "./HomeSlice";
 
-const { Box, Grid, Container, Divider } = require("@mui/material");
+const { Box, Grid, Container, Divider, Button } = require("@mui/material");
 
 const Home = () => {
-  function loadData() {
-    instance.get(`/userdata?data=${localStorage.getItem("access_token")}`).then((response) => {
-      if (response.data.status === false) window.location.href = "/login";
-      setNickname(response.data.username);
-      setDisplayInfo(response.data.displayInfo);
-    });
-  }
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
+  const userData = useSelector((state) => state.Home.userData);
+  const fypData = useSelector((state) => state.Home.fypData);
+  const dispatch = useDispatch();
   let [nickname, setNickname] = useState("Unknown");
   let [displayInfo, setDisplayInfo] = useState("Unknown");
+  useEffect(() => {
+    dispatch(fetchUserData());
+    dispatch(fetchFypData());
+  }, []);
+
+  useEffect(() => {
+    setNickname(userData);
+  }, [userData]);
+
+  let Posts = fypData.map((data, index) => {
+    return <PublicPostCard IsVerified={true} key={data.id} id={data.id} index={index} />;
+  });
+
   return (
     <React.Fragment>
       <Container>
@@ -36,9 +40,7 @@ const Home = () => {
               <Divider sx={{ mt: 2, fontSize: 14 }} className="mukta" textAlign="left">
                 Public Posts
               </Divider>
-
-              <PublicPostCard IsVerified={true} />
-              <PublicPostCard IsVerified={false} />
+              {Posts}
             </Grid>
             <Grid item xs={12} md={3.5}>
               <TopicCard />

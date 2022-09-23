@@ -5,18 +5,14 @@ import EventIcon from "@mui/icons-material/Event";
 import NewspaperIcon from "@mui/icons-material/Newspaper";
 import React, { useState } from "react";
 import MainTheme from "../MainTheme";
+import NewPostFormPopUp from "./NewPostFormPopUp";
 
 const NewPostForm = () => {
   let [ShouldOpenBackdrop, setShouldOpenBackdrop] = useState(false);
-
   return (
     <React.Fragment>
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={ShouldOpenBackdrop}
-        onMouseUp={() => setShouldOpenBackdrop(false)}
-      >
-        <Avatar />
+      <Backdrop sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }} open={ShouldOpenBackdrop}>
+        <NewPostFormPopUp aaa="awdawfawf " backdropHandle={setShouldOpenBackdrop} />
       </Backdrop>
       <ThemeProvider theme={MainTheme}>
         <Card sx={{ boxShadow: 2 }}>

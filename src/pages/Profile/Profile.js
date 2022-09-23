@@ -1,21 +1,23 @@
-import { Container, Grid, Stack, Typography } from "@mui/material";
+import { Backdrop, Button, CircularProgress, Container, Grid, Stack, Typography } from "@mui/material";
 import BioCard from "./BioCard";
 import MainCard from "./MainCard";
 import ProfileSettingsCard from "./ProfileSettingsCard";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import instance from "../../Util/Axios";
+import AxiosHttpInstance from "../../Util/Axios";
+import InformationDetail from "./InformationDetail";
 
 const Profile = () => {
-  let [fullname, setFullname] = useState("");
-  let [displayInfo, setDisplayInfo] = useState("");
-  let [biodata, setBiodata] = useState("");
+  const [fullname, setFullname] = useState("");
+  const [displayInfo, setDisplayInfo] = useState("");
+  const [biodata, setBiodata] = useState("");
   function getUserData(access_token) {
-    instance.get(`/userdata?data=${access_token}`).then((response) => {
-      setFullname(response.data.firstname + " " + response.data.lastname);
-      setDisplayInfo(response.data.displayInfo);
-      setBiodata(response.data.biodata);
+    AxiosHttpInstance.get(`api/account/${localStorage.getItem("user_id")}`).then((response) => {
+      const data = response.data.data.userData;
+      setFullname(data.firstname + " " + data.lastname);
     });
   }
+  const [showDetailInformation, setShowDetailInformation] = useState(false);
   useEffect(() => {
     getUserData(localStorage.getItem("access_token"));
   }, []);
@@ -26,7 +28,7 @@ const Profile = () => {
         <Grid container spacing={1}>
           <Grid item xs={12} md={8}>
             <Stack spacing={2}>
-              <MainCard fullname={fullname} displayInfo={displayInfo} />
+              <MainCard fullname={fullname} displayInfo={displayInfo} handle={setShowDetailInformation} />
               <BioCard biodata={biodata} />
             </Stack>
           </Grid>
@@ -35,6 +37,9 @@ const Profile = () => {
           </Grid>
         </Grid>
       </Container>
+      <Backdrop open={showDetailInformation}>
+        <InformationDetail closeHandle={setShowDetailInformation} fullname={fullname} />
+      </Backdrop>
     </React.Fragment>
   );
 };

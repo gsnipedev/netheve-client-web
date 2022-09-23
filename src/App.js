@@ -4,6 +4,7 @@ import MainLayout from "./Layouts/MainLayout";
 import Friends from "./pages/Friends";
 import Home from "./pages/Home";
 import LoginCard from "./pages/Login";
+import Posts from "./pages/Posts";
 import Profile from "./pages/Profile";
 import RegisterCard from "./pages/Register";
 
@@ -15,6 +16,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/posts" element={<Posts />}></Route>
         </Route>
         <Route path="/login" element={<LoginCard />} />
         <Route path="/register" element={<RegisterCard />} />

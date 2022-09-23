@@ -13,6 +13,14 @@ import {
 import React from "react";
 import MainTheme from "../../components/MainTheme";
 
+const LogoutHandle = () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("username");
+
+  window.location.href = "/login";
+};
+
 const ProfileSettingsCard = () => {
   return (
     <React.Fragment>
@@ -49,7 +57,7 @@ const ProfileSettingsCard = () => {
                   </Stack>
                 </ListItemButton>
               </ListItem>
-              <ListItem disablePadding>
+              <ListItem disablePadding onClick={LogoutHandle}>
                 <ListItemButton className="nav-button">
                   <Stack direction="row" spacing={2}>
                     <Logout />

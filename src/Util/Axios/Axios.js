@@ -1,5 +1,11 @@
 import axios from "axios";
 
-const instance = axios.create({ baseURL: "http://localhost:8080" });
+const AxiosHttpInstance = axios.create({
+  baseURL: "http://192.168.43.151:1337/",
+});
 
-export default instance;
+const AxiosHttpsInstance = axios.create({
+  baseURL: "https://" + process.env.SERVER_ADDRESS + ":" + process.env.SERVER_PORT,
+});
+
+export default AxiosHttpInstance;

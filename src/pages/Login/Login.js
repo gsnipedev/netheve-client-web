@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import * as React from "react";
 import "../../App.css";
 import Footer from "../../components/Footer";
-import instance from "../../Util/Axios";
+import AxiosHttpInstance from "../../Util/Axios";
 import { useState } from "react";
 import { Backdrop, CircularProgress } from "@mui/material";
 
@@ -28,20 +28,22 @@ const LoginCard = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
     setLoading(true);
-    const data = new FormData(event.currentTarget);
+    const loginFormData = new FormData(event.currentTarget);
+    const data = {
+      username: `${loginFormData.get("username")}`,
+      password: `${loginFormData.get("password")}`,
+    };
 
-    instance
-      .post("/account/login", {
-        email: data.get("email"),
-        password: data.get("password"),
-      })
+    AxiosHttpInstance.post("api/account/login", data)
       .then((response) => {
         setLoading(false);
-        console.log(response.data);
-        if (response.data.loginStatus) {
-          localStorage.setItem("access_token", response.data.access_token);
+        console.log(response.data.data.error_message);
+        if (response.data.data.error_message === "Logged In") {
+          localStorage.setItem("access_token", response.data.data.access_token);
+          localStorage.setItem("username", data.username);
+          localStorage.setItem("user_id", response.data.data.user_id);
           window.location.href = "/";
-        } else seterror_message(response.data.error_message);
+        } else seterror_message(response.data.data.error_message);
       })
       .catch((error) => {
         setLoading(false);
@@ -81,10 +83,10 @@ const LoginCard = () => {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                placeholder="Email Address"
-                name="email"
-                autoComplete="email"
+                id="username"
+                placeholder="Username"
+                name="username"
+                autoComplete="username"
                 autoFocus
               />
               <TextField

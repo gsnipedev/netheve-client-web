@@ -1,4 +1,4 @@
-import { Verified } from "@mui/icons-material";
+import { MoreHoriz, MoreVert, ThumbDown, ThumbUpOffAltOutlined, ThumbUpOutlined, Verified } from "@mui/icons-material";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import SendIcon from "@mui/icons-material/Send";
 import ShareIcon from "@mui/icons-material/Share";
@@ -16,24 +16,94 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useReducer, useState, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFypData } from "../../pages/Home/HomeSlice";
+import AxiosHttpInstance from "../../Util/Axios";
 import MainTheme from "../MainTheme";
 import ReplyTextField from "../ReplyTextField";
 import Comments from "./Comments";
-import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
+import { refreshCard } from "./PostCardDataSlice";
 
 const PublicPostCard = (props) => {
-  let [IsCommentOpen, setCommentOpen] = useState(false);
-  let [IsPublicCommentOpen, setPublicCommentOpen] = useState(false);
+  const localPostData = useSelector((state) => state.Home.fypData[props.index]);
+  const dispatch = useDispatch();
+  const [IsCommentOpen, setCommentOpen] = useState(false);
+  const [localLikeId, setLocalLikeId] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likes, setLikes] = useState([]);
+  const [likeCount, setLikeCount] = useState(likes.length);
+  const [comments, setComments] = useState([]);
+  const [commentCount, setCommentCount] = useState(comments.length);
+  const [IsPublicCommentOpen, setPublicCommentOpen] = useState(false);
+
   function HandleCommentToggleOn() {
     setCommentOpen(!IsCommentOpen);
     setPublicCommentOpen(true);
   }
-  const isVerified = props.IsVerified;
+
+  const CheckIsThisPostAlreadyLiked = () => {
+    AxiosHttpInstance.get(`api/like/check?postId=${localPostData.id}&userId=${localStorage.getItem("user_id")}`).then(
+      (response) => {
+        const data = response.data.data;
+        setIsLiked(data.isLiked);
+        setLocalLikeId(data.id);
+      }
+    );
+  };
+
+  function HandleLikesPost() {
+    const data = {
+      postId: localPostData.id,
+      issuerId: localStorage.getItem("user_id"),
+    };
+
+    switch (isLiked) {
+      case false:
+        AxiosHttpInstance.post("api/like", data).then((response) => {
+          CheckIsThisPostAlreadyLiked();
+          dispatch(fetchFypData());
+        });
+        break;
+
+      case true:
+        AxiosHttpInstance.delete("api/like?id=" + localLikeId).then((response) => {
+          CheckIsThisPostAlreadyLiked();
+          dispatch(fetchFypData());
+        });
+        break;
+    }
+  }
+  useEffect(() => {
+    CheckIsThisPostAlreadyLiked();
+    setLikes(localPostData.likes);
+    setComments(localPostData.comments);
+  }, []);
+
+  useEffect(() => {
+    setLikeCount(likes.length);
+  }, [likes]);
+
+  useEffect(() => {
+    setCommentCount(comments.length);
+  }, [comments]);
+
+  useEffect(() => {
+    setComments(localPostData.comments);
+    setLikes(localPostData.likes);
+  }, [localPostData]);
+
+  useMemo(() => {
+    setInterval(() => {
+      dispatch(fetchFypData());
+    }, 5000);
+  }, []);
+
   return (
     <React.Fragment>
       <ThemeProvider theme={MainTheme}>
-        <Card sx={{ mt: 1, boxShadow: 2 }}>
+        <Card sx={{ mt: 1, boxShadow: 2, position: "relative" }}>
+          <MoreVert sx={{ position: "absolute", right: 10, top: 10 }} />
           <CardContent sx={{ paddingBottom: "8px !important" }}>
             <Stack spacing={1}>
               <Grid container spacing={1}>
@@ -42,10 +112,10 @@ const PublicPostCard = (props) => {
                 </Grid>
                 <Grid item xs={6}>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography className="barlow">Nickname</Typography>
+                    <Typography className="barlow">{localPostData.account.username}</Typography>
                     <Tooltip title="Verified" placement="right" arrow>
                       <Verified
-                        sx={{ display: isVerified === true ? "flex" : "none", color: "#009FB7" }}
+                        sx={{ display: props.IsVerified === true ? "flex" : "none", color: "#009FB7" }}
                         fontSize="small"
                       />
                     </Tooltip>
@@ -55,26 +125,26 @@ const PublicPostCard = (props) => {
                   </Typography>
                 </Grid>
               </Grid>
-              <Typography className="mukta" fontSize="12">
-                bro hayuk mabar bro
+              <Typography className="mukta" fontSize="12" sx={{ overflowWrap: "break-word" }}>
+                {localPostData.textContent}
               </Typography>
               <Stack direction="row" alignItems="center" spacing={0.5}>
                 <ThumbUpIcon sx={{ fontSize: 18 }} color="info" />
                 <Typography className="mukta" color="gray">
-                  15k
+                  {likeCount}
                 </Typography>
                 <Typography className="mukta" color="gray">
                   ·
                 </Typography>
                 <Typography justifySelf="end" fontSize={14}>
-                  15k Comments
+                  {commentCount} Comments
                 </Typography>
               </Stack>
               <Divider />
               <Stack direction="row" justifyContent="space-between" alignItems="center">
-                <Button variant="text" sx={{ textTransform: "none" }}>
+                <Button variant="text" sx={{ textTransform: "none" }} onClick={HandleLikesPost}>
                   <Stack direction="row" spacing={1}>
-                    <ThumbUpOffAltIcon />
+                    {isLiked ? <ThumbUpIcon /> : <ThumbUpOutlined />}
                     <Typography className="mukta" sx={{ display: { xs: "none", sm: "flex" } }}>
                       Like
                     </Typography>
@@ -111,8 +181,10 @@ const PublicPostCard = (props) => {
                   </Stack>
                 </Button>
               </Stack>
-              <ReplyTextField ShouldShow={IsCommentOpen} />
-              <Comments commentNickname="User Dummy 1" commentText="Wot defok?" ShouldShow={IsPublicCommentOpen} />
+              <ReplyTextField ShouldShow={IsCommentOpen} type="comment" postId={localPostData.id} />
+              {comments.map((data, index) => {
+                return <Comments key={data.id} ShouldShow={IsPublicCommentOpen} data={data} />;
+              })}
             </Stack>
           </CardContent>
         </Card>
