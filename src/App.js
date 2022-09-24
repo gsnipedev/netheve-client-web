@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
 import MainLayout from "./Layouts/MainLayout";
@@ -7,6 +9,7 @@ import LoginCard from "./pages/Login";
 import Posts from "./pages/Posts";
 import Profile from "./pages/Profile";
 import RegisterCard from "./pages/Register";
+import { fetchLocalFollower, fetchLocalFollowing, fetchUserData } from "./Util/Slices/LocalUserDataSlice";
 
 function App() {
   return (

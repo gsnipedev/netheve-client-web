@@ -2,25 +2,39 @@ import { Backdrop, Button, CircularProgress, Container, Grid, Stack, Typography 
 import BioCard from "./BioCard";
 import MainCard from "./MainCard";
 import ProfileSettingsCard from "./ProfileSettingsCard";
-import React, { useContext, useEffect, useState } from "react";
-import instance from "../../Util/Axios";
-import AxiosHttpInstance from "../../Util/Axios";
+import React, { useEffect, useState } from "react";
 import InformationDetail from "./InformationDetail";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchFollowerData, fetchFollowingData, fetchProfileData, refreshId } from "../../Util/Slices/ProfileSlice";
+import FollowingsDetail from "./FollowingsDetail";
+import FollowerDetail from "./FollowerDetail";
+import { useSearchParams } from "react-router-dom";
+import { fetchLocalFollower, fetchLocalFollowing } from "../../Util/Slices/LocalUserDataSlice";
 
 const Profile = () => {
-  const [fullname, setFullname] = useState("");
+  const localUserData = useSelector((state) => state.LocalUserData);
+  const dispatch = useDispatch();
   const [displayInfo, setDisplayInfo] = useState("");
   const [biodata, setBiodata] = useState("");
-  function getUserData(access_token) {
-    AxiosHttpInstance.get(`api/account/${localStorage.getItem("user_id")}`).then((response) => {
-      const data = response.data.data.userData;
-      setFullname(data.firstname + " " + data.lastname);
-    });
-  }
+  const [param, setParam] = useSearchParams();
+
   const [showDetailInformation, setShowDetailInformation] = useState(false);
+  const [showFollowingsDetail, setShowFollowingsDetail] = useState(false);
+  const [showFollowerDetail, setShowFollowerDetail] = useState(false);
   useEffect(() => {
-    getUserData(localStorage.getItem("access_token"));
+    const id = param.get("id") == null ? localStorage.getItem("user_id") : param.get("id");
+    console.log("local id: " + id);
+    dispatch(fetchLocalFollower());
+    dispatch(fetchLocalFollowing());
+    dispatch(fetchFollowingData(id));
+    dispatch(fetchFollowerData(id));
+    dispatch(fetchProfileData(id));
+    dispatch(refreshId(id));
   }, []);
+
+  useEffect(() => {
+    console.log(localUserData.following);
+  }, [localUserData.following]);
 
   return (
     <React.Fragment>
@@ -28,17 +42,30 @@ const Profile = () => {
         <Grid container spacing={1}>
           <Grid item xs={12} md={8}>
             <Stack spacing={2}>
-              <MainCard fullname={fullname} displayInfo={displayInfo} handle={setShowDetailInformation} />
+              <MainCard
+                displayInfo={displayInfo}
+                handleInformation={setShowDetailInformation}
+                handleFollowings={setShowFollowingsDetail}
+                handleFollower={setShowFollowerDetail}
+              />
               <BioCard biodata={biodata} />
             </Stack>
           </Grid>
           <Grid item xs={12} md={4}>
-            <ProfileSettingsCard />
+            {param.get("id") === null || param.get("id") == localStorage.getItem("user_id") ? (
+              <ProfileSettingsCard />
+            ) : null}
           </Grid>
         </Grid>
       </Container>
       <Backdrop open={showDetailInformation}>
-        <InformationDetail closeHandle={setShowDetailInformation} fullname={fullname} />
+        <InformationDetail closeHandle={setShowDetailInformation} />
+      </Backdrop>
+      <Backdrop open={showFollowingsDetail}>
+        <FollowingsDetail handle={setShowFollowingsDetail} />
+      </Backdrop>
+      <Backdrop open={showFollowerDetail}>
+        <FollowerDetail handle={setShowFollowerDetail} />
       </Backdrop>
     </React.Fragment>
   );

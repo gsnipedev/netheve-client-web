@@ -4,24 +4,17 @@ import NewPostForm from "../../components/NewPostForm";
 import ProfileCard from "../../components/ProfileCard";
 import PublicPostCard from "../../components/PublicPostCard";
 import TopicCard from "../../components/TopicCard";
-import { fetchFypData, fetchUserData, updateHomeState } from "./HomeSlice";
+import { fetchFypData, updateHomeState } from "./HomeSlice";
 
 const { Box, Grid, Container, Divider, Button } = require("@mui/material");
 
 const Home = () => {
-  const userData = useSelector((state) => state.Home.userData);
   const fypData = useSelector((state) => state.Home.fypData);
   const dispatch = useDispatch();
-  let [nickname, setNickname] = useState("Unknown");
-  let [displayInfo, setDisplayInfo] = useState("Unknown");
-  useEffect(() => {
-    dispatch(fetchUserData());
-    dispatch(fetchFypData());
-  }, []);
 
   useEffect(() => {
-    setNickname(userData);
-  }, [userData]);
+    dispatch(fetchFypData());
+  }, []);
 
   let Posts = fypData.map((data, index) => {
     return <PublicPostCard IsVerified={true} key={data.id} id={data.id} index={index} />;
@@ -33,7 +26,7 @@ const Home = () => {
         <Box sx={{ flexGrow: 1 }}>
           <Grid container spacing={2}>
             <Grid item xs={12} md={2.5}>
-              <ProfileCard nickname={nickname} displayInfo={displayInfo} />
+              <ProfileCard />
             </Grid>
             <Grid item xs={12} md={6}>
               <NewPostForm />
