@@ -1,22 +1,11 @@
 import { Close } from "@mui/icons-material";
-import {
-  Avatar,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  Container,
-  Divider,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
-import { useState } from "react";
+import { Card, CardContent, CardHeader, Container, Divider, IconButton, Stack } from "@mui/material";
 
 import { useSelector } from "react-redux";
+import { FollowingDetailItem } from "./FollowingDetailItem";
 
 const FollowingsDetail = (props) => {
-  const data = useSelector((state) => state.LocalUserData.following);
+  const data = useSelector((state) => state.Profiledata.following);
   function followingList() {
     const localData = Array.from(data);
     if (Array.from(localData).length < 1) {
@@ -24,7 +13,7 @@ const FollowingsDetail = (props) => {
     }
 
     const listData = localData.map((data, index) => {
-      return <FollowingDetailItem key={data.id} username={data.right.username} />;
+      return <FollowingDetailItem key={data.id} id={data.right.id} username={data.right.username} />;
     });
 
     return listData;
@@ -44,38 +33,5 @@ const FollowingsDetail = (props) => {
     </Container>
   );
 };
-
-function FollowingDetailItem(props) {
-  const [buttonText, setButtonText] = useState("Unfollow");
-  const [buttonVariant, setButtonVariant] = useState("outlined");
-  const [currentAction, setCurrentAction] = useState(true);
-  function followHandle() {
-    if (currentAction) {
-      setButtonText("Follow");
-      setButtonVariant("contained");
-      setCurrentAction(!currentAction);
-    } else {
-      setButtonText("Unfollow");
-      setButtonVariant("outlined");
-      setCurrentAction(!currentAction);
-    }
-  }
-  return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center">
-      <Stack direction="row" alignItems="center" spacing={2}>
-        <Avatar />
-        <Typography className="barlow">{props.username}</Typography>
-      </Stack>
-      <Button
-        variant={buttonVariant}
-        className="mukta"
-        sx={{ textTransform: "none", boxShadow: "none" }}
-        onClick={followHandle}
-      >
-        {buttonText}
-      </Button>
-    </Stack>
-  );
-}
 
 export default FollowingsDetail;

@@ -52,6 +52,10 @@ const PublicPostCard = (props) => {
     );
   };
 
+  function VisitProfile() {
+    window.location.href = "/profile?id=" + localPostData.account.id;
+  }
+
   function HandleLikesPost() {
     const data = {
       postId: localPostData.id,
@@ -112,7 +116,9 @@ const PublicPostCard = (props) => {
                 </Grid>
                 <Grid item xs={6}>
                   <Stack direction="row" alignItems="center" spacing={1}>
-                    <Typography className="barlow">{localPostData.account.username}</Typography>
+                    <Typography className="barlow" onClick={() => VisitProfile()}>
+                      {localPostData.account.username}
+                    </Typography>
                     <Tooltip title="Verified" placement="right" arrow>
                       <Verified
                         sx={{ display: props.IsVerified === true ? "flex" : "none", color: "#009FB7" }}
